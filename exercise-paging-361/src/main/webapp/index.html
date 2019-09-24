@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>pagingexercise361</title>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/lodash.min.js"></script>
+
+    <script type="text/javascript">
+        var app = {
+            items: [],
+            nextpage: 0,
+            prevpage: 0
+        };
+
+        function updateList() {
+            $("#my-list").html("");
+            app.items.forEach(function (e) {
+                $("#my-list").append("<li>" + e + "</li>");
+            });
+            if (app.prevpage.length === 10) {
+                $("#prev-button").attr("disabled", true);
+            } else {
+                $("#prev-button").attr("disabled", false);
+            }
+            if (app.nextpage.length === 10) {
+                $("#next-button").attr("disabled", true);
+            } else {
+                $("#next-button").attr("disabled", false);
+            }
+        }
+
+        function getListItems(input) {
+            $.ajax({
+                url: input,
+                type: 'GET',
+                dataType: 'json',
+                success: function (r) {
+                    app.items = r.list;
+                    app.prevpage = r.prev;
+                    app.nextpage = r.next;
+                    updateList();
+                }
+            });
+        }
+
+        function sendListItem() {
+            var s = $("#texttosend").val();
+
+            $.post("todo", {texttosend: s}, function () {
+                getListItems();
+            });
+        }
+
+        $(document).ready(function () {
+            getListItems('services/items?size=10&page=0');
+
+            $("#send-item").on('click', function () {
+                sendListItem();
+            });
+
+            $("#prev-button").on('click', function () {
+                getListItems(app.prevpage);
+            });
+
+            $("#next-button").on('click', function () {
+                getListItems(app.nextpage);
+            });
+        });
+    </script>
+</head>
+<body>
+<h2>Paging Application</h2>
+
+
+<ul id="my-list"></ul>
+
+
+<br>
+<button id="prev-button">Previous</button>
+<button id="next-button">Next</button>
+</body>
+</html>
